@@ -242,6 +242,15 @@
 .field--time .field__input {
   font-size: 1.05rem;
   text-align: center;
+  /* iOS Safari draws <input type="time"> as its own wide native pill with
+     OS-controlled chrome, ignoring our border/background/padding -- much
+     wider than how Chrome renders the same element, which is why the exact
+     same CSS looked right on desktop but overflowed specifically on iOS.
+     Stripping the native appearance lets our own styling take over instead;
+     tapping the field still opens iOS's native wheel picker, since that
+     behaviour is tied to the input's type, not its visual chrome. */
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 /* --- buttons ------------------------------------------------------------- */
