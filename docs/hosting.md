@@ -9,7 +9,7 @@ certificate, and that part is not optional:
 > has no Bluetooth support — even in Bluefy, on a page that is otherwise
 > working perfectly. A self-signed certificate is usually rejected too.
 
-Throughout, replace `milena.twojadomena.pl` with your domain and `love` with
+Throughout, replace `milena-led.duckdns.org` with your domain and `love` with
 whatever you want the nginx site called.
 
 ---
@@ -39,23 +39,66 @@ monthly fee.
 
 ---
 
-## 1. DNS
+## 1. DNS with DuckDNS
 
-Point an A record at your public IP:
+DuckDNS is free, needs no domain purchase, and gives you a hostname that
+follows your home IP around. Let's Encrypt issues certificates for
+`duckdns.org` subdomains without trouble — it is on the Public Suffix List, so
+your subdomain counts as its own registered domain and does not share rate
+limits with everyone else using DuckDNS.
 
-```
-milena.twojadomena.pl.   A   203.0.113.42
-```
+1. Sign in at [duckdns.org](https://www.duckdns.org) with any of the listed
+   providers.
+2. Create a subdomain — say `milena-led`, giving you
+   `milena-led.duckdns.org`.
+3. Copy the **token** shown at the top of the page.
 
-If your home IP changes, use a dynamic DNS client (`ddclient`, or whatever your
-router offers) so the record follows it. A certificate renewal against a stale
-record fails silently until the cert expires.
-
-Wait for it to propagate, then confirm from the server:
+Install the updater on the server:
 
 ```bash
-dig +short milena.twojadomena.pl
+sudo cp deploy/duckdns-update.sh /usr/local/bin/duckdns-update
 ```
+
+```bash
+sudo chmod +x /usr/local/bin/duckdns-update
+```
+
+Write the config with your own subdomain and token. It is `chmod 600` because
+anyone holding that token can repoint your domain:
+
+```bash
+printf 'DUCKDNS_DOMAIN=milena-led\nDUCKDNS_TOKEN=paste-token-here\n' | sudo tee /etc/duckdns.conf
+```
+
+```bash
+sudo chmod 600 /etc/duckdns.conf
+```
+
+Run it once to check it works — it should log `OK`:
+
+```bash
+sudo /usr/local/bin/duckdns-update && sudo tail -n 1 /var/log/duckdns.log
+```
+
+Then keep it current. `sudo crontab -e`, and add:
+
+```
+*/5 * * * * /usr/local/bin/duckdns-update
+```
+
+Confirm DNS resolves to your address:
+
+```bash
+dig +short milena-led.duckdns.org
+```
+
+That must match `curl -s https://api.ipify.org`. If it does not, the updater
+has not run or the token is wrong — fix it before going near certbot, because a
+certificate request against a stale record just fails.
+
+> Note: unlike a Cloudflare-proxied domain, DuckDNS points straight at your
+> house, so your home IP is publicly visible in DNS. For a bedroom LED sign
+> that is a fair trade, but it is worth knowing.
 
 ---
 
@@ -75,7 +118,7 @@ The whole site is the `web/` directory. From your PC, in the project folder
 (Git Bash on Windows):
 
 ```bash
-rsync -av --delete web/ teslunia@milena.twojadomena.pl:/tmp/love-web/
+rsync -av --delete web/ tesla@homeserver:/tmp/love-web/
 ```
 
 Then on the server:
@@ -116,25 +159,41 @@ sudo cp deploy/nginx-love-bootstrap.conf /etc/nginx/sites-available/love
 sudo ln -s /etc/nginx/sites-available/love /etc/nginx/sites-enabled/love
 ```
 
-Remove Debian's default site if it would otherwise answer for your domain:
-
-```bash
-sudo rm -f /etc/nginx/sites-enabled/default
-```
+**Leave the other sites alone.** This block has an explicit `server_name`, so
+nginx routes by hostname and your existing sites are untouched. There is no
+need to remove `default` — and on a server already hosting other things, doing
+so is a good way to break one of them.
 
 ```bash
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-At this point `http://milena.twojadomena.pl` should show the page. It cannot
+At this point `http://milena-led.duckdns.org` should show the page. It cannot
 talk to the matrix yet — that is expected, and it is exactly the failure the
 certificate fixes.
 
 Now request the certificate:
 
 ```bash
-sudo certbot certonly --webroot -w /var/www/html -d milena.twojadomena.pl
+sudo certbot certonly --webroot -w /var/www/html -d milena-led.duckdns.org
 ```
+
+### If that fails because port 80 is unreachable
+
+Some ISPs block inbound port 80 outright. If certbot times out on the challenge,
+switch to DNS-01, which proves ownership by writing a DNS record instead and
+needs no open port at all. DuckDNS has a plugin for it:
+
+```bash
+sudo apt install python3-pip && sudo pip3 install certbot-dns-duckdns --break-system-packages
+```
+
+```bash
+sudo certbot certonly --authenticator dns-duckdns --dns-duckdns-token YOUR-TOKEN --dns-duckdns-propagation-seconds 60 -d milena-led.duckdns.org
+```
+
+You still need **443** forwarded for the site itself — DNS-01 only replaces the
+validation step, not the serving.
 
 ---
 
@@ -171,7 +230,7 @@ sudo certbot renew --dry-run
 From any browser:
 
 ```bash
-curl -sI https://milena.twojadomena.pl | head -n 20
+curl -sI https://milena-led.duckdns.org | head -n 20
 ```
 
 You want `HTTP/2 200`, `content-type: text/html`, and **no**
@@ -185,7 +244,7 @@ Check the JavaScript is served correctly, since a wrong MIME type plus the
 blank:
 
 ```bash
-curl -sI https://milena.twojadomena.pl/js/main.js | grep -i content-type
+curl -sI https://milena-led.duckdns.org/js/main.js | grep -i content-type
 ```
 
 That must say `text/javascript` or `application/javascript`.
@@ -205,7 +264,7 @@ being trusted. Check the padlock in Bluefy before looking anywhere else.
 ## Deploying a change later
 
 ```bash
-rsync -av --delete web/ teslunia@milena.twojadomena.pl:/tmp/love-web/
+rsync -av --delete web/ tesla@homeserver:/tmp/love-web/
 ```
 
 ```bash
