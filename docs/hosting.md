@@ -1,8 +1,15 @@
-# Hosting the web app
+# Hosting the web app, on your own server
 
-The site is static — no build step, no npm, no backend. Hosting it is copying a
-directory and pointing nginx at it. The only genuinely fiddly part is the
-certificate, and that part is not optional:
+> The site is currently live on **GitHub Pages** at
+> <https://im-tesla.github.io/project-love/>, deployed automatically by
+> [`.github/workflows/pages.yml`](../.github/workflows/pages.yml). That is the
+> simpler path and needs none of what follows — see the README's Deploying
+> section. This document is for moving it to your own home server instead,
+> which trades that simplicity for keeping everything under your own roof.
+
+The site is static — no build step, no npm, no backend. Hosting it yourself is
+copying a directory and pointing nginx at it. The only genuinely fiddly part is
+the certificate, and that part is not optional:
 
 > **Web Bluetooth requires a secure context.** `navigator.bluetooth` does not
 > exist over plain `http://`, so the Połącz button will report that the browser

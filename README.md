@@ -11,7 +11,7 @@ and the same message comes back without a phone anywhere near it.
    iPhone / Bluefy              ESP32-C3 Super Mini         MAX7219 8×32
   ┌────────────────┐           ┌───────────────────┐       ┌──────────┐
   │  static page   │── CMD ───▶│  NimBLE server    │──SPI─▶│  ♥ text  │
-  │  (your server) │◀─ STATE ──│  NVS persistence  │       │          │
+  │ (GitHub Pages) │◀─ STATE ──│  NVS persistence  │       │          │
   └────────────────┘           └───────────────────┘       └──────────┘
 ```
 
@@ -99,22 +99,28 @@ night mode — works on a desktop with nothing plugged in.
 
 ### Deploying
 
-Full walkthrough: **[docs/hosting.md](docs/hosting.md)**. The short version is
-copy `web/` to the server and use [`deploy/nginx-love.conf`](deploy/nginx-love.conf),
-with [`deploy/nginx-love-bootstrap.conf`](deploy/nginx-love-bootstrap.conf) to
-get through the first certificate.
+**Live at <https://im-tesla.github.io/project-love/>**, via GitHub Pages. A
+workflow ([`.github/workflows/pages.yml`](.github/workflows/pages.yml))
+publishes `web/` on every push to `master` that touches it — no build step,
+since the site is already plain ES modules. Pages gives it a real certificate
+for free, which is the one hard requirement here: `navigator.bluetooth` does
+not exist in an insecure context, so over `http://` the Połącz button reports
+that the browser has no Bluetooth support, even in Bluefy.
 
-**HTTPS is not optional.** `navigator.bluetooth` does not exist in an insecure
-context, so over `http://` the Połącz button will report that the browser has no
-Bluetooth support — even in Bluefy. A self-signed certificate will usually be
-rejected too. Use certbot.
+The site is a **project page**, so it lives under a `/project-love/` subpath
+rather than at a bare domain. Every import and asset reference in `web/` is
+relative for exactly that reason — check that a new file follows the same rule
+before adding it.
 
-Also: do not send a `Permissions-Policy` header that omits `bluetooth`. It
-disables the API silently, with nothing useful in the console.
+The repo is public, which is what makes the free tier of Pages possible. That
+also means the source — and the surprise — is visible to anyone who finds the
+repo. Decided that trade was worth it over paying for GitHub Pro to keep Pages
+on a private repo.
 
-Before anything else, check you are not behind CGNAT — mobile and some cable
-ISPs in Poland use it by default, and no amount of port forwarding gets past it.
-docs/hosting.md opens with that check and covers the alternatives.
+Self-hosting behind your own nginx is still fully documented in
+[docs/hosting.md](docs/hosting.md) if you ever want to move off Pages — the
+DuckDNS + certbot path, a Cloudflare-fronted path, and the nginx configs for
+both are all still there and still correct.
 
 ### On her phone
 
