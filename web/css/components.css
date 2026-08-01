@@ -226,8 +226,23 @@
 
 .field--inline .field__label { margin: 0; }
 
-.field--time { flex: 1; }
-.field--time .field__input { font-size: 1.05rem; text-align: center; }
+.field--time {
+  flex: 1;
+  /* Flex items default to min-width: auto, which floors their size at the
+     content's natural minimum rather than letting them shrink to fit. A
+     native <input type="time"> has a wide natural minimum -- wide enough
+     that two side by side overran a phone screen and overlapped instead of
+     wrapping. This override is what lets them actually shrink. */
+  min-width: 0;
+}
+.field--time .field__input {
+  font-size: 1.05rem;
+  text-align: center;
+  /* Same fix at the input level: without it, the input's own intrinsic
+     content width can still win over its parent's width: 100%. */
+  min-width: 0;
+  padding-inline: 0.4rem;
+}
 
 /* --- buttons ------------------------------------------------------------- */
 
