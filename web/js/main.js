@@ -169,7 +169,7 @@ function explainUnavailable() {
   return 'Ta przeglądarka nie obsługuje Bluetooth. Na iPhonie otwórz stronę w aplikacji Bluefy.';
 }
 
-connectButton.addEventListener('click', async () => {
+async function attemptConnect() {
   if (!Transport.available || !Transport.secureContext) {
     gateNote.textContent = explainUnavailable();
     return;
@@ -178,17 +178,24 @@ connectButton.addEventListener('click', async () => {
   connectButton.disabled = true;
   gateNote.textContent = 'Szukam tabliczki…';
   try {
-    // Must run inside the tap: iOS will not open the chooser otherwise.
+    // Must run inside a tap for the real transport: iOS will not open the
+    // device chooser otherwise. Mock has no such rule, which is what lets it
+    // be triggered automatically below.
     await link.connect();
     gateNote.textContent = '';
   } catch (error) {
+    console.error('connect failed', error);
     gateNote.textContent = error?.name === 'NotFoundError'
       ? 'Nie wybrano tabliczki. Spróbuj jeszcze raz — powinna nazywać się „Milena ♥”.'
-      : 'Nie udało się połączyć. Sprawdź, czy tabliczka jest podłączona do prądu.';
+      : error?.name === 'TimeoutError'
+        ? 'Połączenie trwało za długo. Spróbuj jeszcze raz.'
+        : 'Nie udało się połączyć. Sprawdź, czy tabliczka jest podłączona do prądu.';
   } finally {
     connectButton.disabled = false;
   }
-});
+}
+
+connectButton.addEventListener('click', attemptConnect);
 
 // --- start -----------------------------------------------------------------
 
@@ -198,5 +205,13 @@ setupIntro(() => {
   $('#gate').hidden = false;
   if (!Transport.available || !Transport.secureContext) {
     gateNote.textContent = explainUnavailable();
+    return;
+  }
+
+  // Mock mode exists purely to preview the app -- with no hardware to pick,
+  // requiring a tap on the same gate a real connection needs would just be
+  // friction. Real BLE keeps the manual tap; iOS requires it.
+  if (useMock) {
+    attemptConnect();
   }
 });

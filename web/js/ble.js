@@ -18,6 +18,27 @@ import {
   frameCommand,
 } from './protocol.js';
 
+// How long the post-selection handshake (GATT connect, service discovery,
+// subscribing to notifications) gets before giving up. Deliberately NOT
+// applied to requestDevice() itself -- that promise does not resolve until
+// she picks a device or cancels, and a real person can reasonably take much
+// longer than this to decide. This timeout exists so that if the board's BLE
+// stack wedges after she has already chosen it, the button comes back and she
+// gets a message instead of the app staring at "Szukam tabliczki…" forever.
+const HANDSHAKE_TIMEOUT_MS = 12000;
+
+function withTimeout(promise, ms, message) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      const error = new Error(message);
+      error.name = 'TimeoutError';
+      reject(error);
+    }, ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 export class BleTransport {
   #device = null;
   #command = null;
@@ -55,6 +76,30 @@ export class BleTransport {
       this.onConnection(false);
     });
 
+    try {
+      await withTimeout(
+        this.#handshake(),
+        HANDSHAKE_TIMEOUT_MS,
+        'connecting to the matrix timed out',
+      );
+    } catch (error) {
+      // Leave no half-open GATT session behind on the way out -- otherwise a
+      // retry can find the OS still thinks it is connected to a device that
+      // never finished setting up.
+      if (this.#device?.gatt?.connected) {
+        this.#device.gatt.disconnect();
+      }
+      throw error;
+    }
+
+    this.onConnection(true);
+
+    // The board has no RTC, so it cannot know the hour on its own. Sending
+    // this on every connect is what makes night mode work at all.
+    await this.syncClock();
+  }
+
+  async #handshake() {
     const server = await this.#device.gatt.connect();
     const service = await server.getPrimaryService(SERVICE_UUID);
 
@@ -72,12 +117,6 @@ export class BleTransport {
       }
     });
     await this.#state.startNotifications();
-
-    this.onConnection(true);
-
-    // The board has no RTC, so it cannot know the hour on its own. Sending
-    // this on every connect is what makes night mode work at all.
-    await this.syncClock();
   }
 
   async disconnect() {
