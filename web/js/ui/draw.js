@@ -8,8 +8,8 @@
 import { encodeColumns } from '../protocol.js';
 import { paint } from '../preview.js';
 
-const WIDTH = 32;
-const HEIGHT = 8;
+const PAD_COLS = 32;
+const PAD_ROWS = 8;
 
 // The same heart the firmware falls back to, so "Serduszko" here and a
 // factory-fresh board agree.
@@ -22,9 +22,9 @@ export function setupDrawing({ view, sendNow, refresh }) {
 
   function cellFrom(event) {
     const rect = pad.getBoundingClientRect();
-    const col = Math.floor(((event.clientX - rect.left) / rect.width) * WIDTH);
-    const row = Math.floor(((event.clientY - rect.top) / rect.height) * HEIGHT);
-    if (col < 0 || col >= WIDTH || row < 0 || row >= HEIGHT) return null;
+    const col = Math.floor(((event.clientX - rect.left) / rect.width) * PAD_COLS);
+    const row = Math.floor(((event.clientY - rect.top) / rect.height) * PAD_ROWS);
+    if (col < 0 || col >= PAD_COLS || row < 0 || row >= PAD_ROWS) return null;
     return { col, row };
   }
 
@@ -86,7 +86,7 @@ export function setupDrawing({ view, sendNow, refresh }) {
 
   document.querySelector('#pad-heart').addEventListener('click', () => {
     view.draw.fill(0);
-    const left = Math.floor((WIDTH - HEART.length) / 2);
+    const left = Math.floor((PAD_COLS - HEART.length) / 2);
     for (let i = 0; i < HEART.length; i++) {
       view.draw[left + i] = HEART[i];
     }

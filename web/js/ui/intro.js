@@ -22,12 +22,20 @@ export function setupIntro(onDone) {
   };
 
   // Already seen this session -- go straight to the point.
-  if (sessionStorage.getItem(SEEN_KEY)) {
-    intro.remove();
-    onDone();
-    return;
+  //
+  // Wrapped because storage is not always available: iOS private browsing and
+  // sandboxed frames both throw on access, and losing the intro is a far
+  // better outcome than losing the whole app to an exception here.
+  try {
+    if (sessionStorage.getItem(SEEN_KEY)) {
+      intro.remove();
+      onDone();
+      return;
+    }
+    sessionStorage.setItem(SEEN_KEY, '1');
+  } catch {
+    // Storage unavailable -- play it every time.
   }
-  sessionStorage.setItem(SEEN_KEY, '1');
 
   intro.addEventListener('click', finish);
   setTimeout(finish, TOTAL_MS);

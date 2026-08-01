@@ -117,8 +117,12 @@ function renderArrow(frame, elapsedMs) {
 /**
  * Renders one frame into a Uint8Array(32). Overwrites every column.
  * Unknown ids fall back to heartbeat, as the firmware does.
+ *
+ * Named renderAnimation rather than render so it stays unambiguous alongside
+ * preview.js's own drawing functions when the modules are flattened into a
+ * single file (see tools/build_single_file.py).
  */
-export function render(id, frame, elapsedMs) {
+export function renderAnimation(id, frame, elapsedMs) {
   switch (id) {
     case 'hearts': return renderHearts(frame, elapsedMs);
     case 'sparkle': return renderSparkle(frame, elapsedMs);

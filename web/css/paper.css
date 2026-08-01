@@ -16,11 +16,17 @@
 
   --rule: rgba(43, 35, 32, 0.14);
 
-  /* Three faces, three jobs. All ship with iOS and macOS, so nothing is
-     downloaded: the page renders instantly, works offline once cached, and
-     needs no third-party origin in a site that must load over HTTPS. */
-  --serif: Baskerville, "Hoefler Text", Palatino, Georgia, serif;
-  --script: "Snell Roundhand", "Savoye LET", "Apple Chancery", cursive;
+  /* Three faces, three jobs. The leading names ship with iOS, which is where
+     she will actually use this, so nothing is downloaded: the page renders
+     instantly, works offline once cached, and needs no third-party origin on a
+     site that must load over HTTPS.
+
+     The Windows names are there for previewing on a desktop. They matter most
+     for --script: left to fall through to the generic `cursive`, Windows
+     serves Comic Sans, which is not the note we are going for. */
+  --serif: Baskerville, "Hoefler Text", "Palatino Linotype", Palatino, Georgia, serif;
+  --script: "Snell Roundhand", "Savoye LET", "Apple Chancery",
+            "Segoe Script", "Brush Script MT", cursive;
   --type: "American Typewriter", "Courier New", ui-monospace, monospace;
 
   --gutter: clamp(1.15rem, 5vw, 1.75rem);

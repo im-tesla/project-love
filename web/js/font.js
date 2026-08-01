@@ -114,7 +114,7 @@ export const GLYPHS = new Map([
   [0x263A, [62, 65, 85, 97, 85, 65, 62]],  // ☺
   [0x2665, [12, 30, 62, 124, 62, 30, 12]],  // ♥
   [0x266A, [48, 48, 31, 1, 1]],  // ♪
-  [0xFFFD, [127, 65, 65, 65, 127]],  // �
+  [0xFFFD, [127, 65, 65, 65, 127]],  // .notdef
 ]);
 
 /** Column bytes for a codepoint, falling back to .notdef. */

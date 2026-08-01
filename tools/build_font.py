@@ -278,6 +278,12 @@ def describe(char: str) -> str:
         return "space"
     if char == "\\":
         return "backslash"
+    if ord(char) == NOTDEF:
+        # Never emit U+FFFD itself into the generated files. It is the
+        # replacement character, so anything downstream that inspects the
+        # output reasonably reads it as a decoding failure rather than as a
+        # deliberate glyph.
+        return ".notdef"
     return char
 
 

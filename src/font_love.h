@@ -164,7 +164,7 @@ inline constexpr LoveGlyph LOVE_FONT_GLYPHS[] = {
     { 0x263A,  436, 7 },  // ☺
     { 0x2665,  443, 7 },  // ♥
     { 0x266A,  450, 5 },  // ♪
-    { 0xFFFD,  455, 5 },  // �
+    { 0xFFFD,  455, 5 },  // .notdef
 };
 
 inline constexpr size_t LOVE_FONT_GLYPH_COUNT =

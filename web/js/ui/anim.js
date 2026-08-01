@@ -4,7 +4,7 @@
 // frame loop rather than four. Choosing is a matter of looking rather than
 // reading four Polish nouns and guessing.
 
-import { ANIMATIONS, COLUMNS, render } from '../animations.js';
+import { ANIMATIONS, COLUMNS, renderAnimation } from '../animations.js';
 import { paint } from '../preview.js';
 
 export function setupAnimations({ view, sendNow, refresh }) {
@@ -51,7 +51,7 @@ export function setupAnimations({ view, sendNow, refresh }) {
   function tick(now) {
     if (document.querySelector('.panel[data-panel="anim"]')?.classList.contains('is-active')) {
       for (const [id, { canvas }] of cards) {
-        render(id, frame, now);
+        renderAnimation(id, frame, now);
         paint(canvas, frame);
       }
     }

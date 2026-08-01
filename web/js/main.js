@@ -25,7 +25,10 @@ import { setupNight } from './ui/night.js';
 
 const $ = (selector) => document.querySelector(selector);
 
-const useMock = new URLSearchParams(location.search).get('mock') === '1';
+// ?mock=1 for local development. LOVE_FORCE_MOCK is set by the single-file
+// build (tools/build_single_file.py), which has no query string to read.
+const useMock = new URLSearchParams(location.search).get('mock') === '1'
+  || window.LOVE_FORCE_MOCK === true;
 const Transport = useMock ? MockTransport : BleTransport;
 const link = new Transport();
 
