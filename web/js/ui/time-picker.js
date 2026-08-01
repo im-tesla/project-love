@@ -41,35 +41,52 @@ function buildSelect(options, ariaLabel) {
  * @returns {HTMLElement} the same container, now populated and interactive
  */
 export function createTimePicker(container, { value, label } = {}) {
-  container.classList.add('time-picker');
-  container.innerHTML = '';
+  try {
+    container.classList.add('time-picker');
+    container.innerHTML = '';
 
-  const hour = buildSelect(HOURS, label ? `Godzina, ${label}` : 'Godzina');
-  const minute = buildSelect(MINUTES, label ? `Minuta, ${label}` : 'Minuta');
+    const hour = buildSelect(HOURS, label ? `Godzina, ${label}` : 'Godzina');
+    const minute = buildSelect(MINUTES, label ? `Minuta, ${label}` : 'Minuta');
 
-  const colon = document.createElement('span');
-  colon.className = 'time-picker__colon';
-  colon.setAttribute('aria-hidden', 'true');
-  colon.textContent = ':';
+    const colon = document.createElement('span');
+    colon.className = 'time-picker__colon';
+    colon.setAttribute('aria-hidden', 'true');
+    colon.textContent = ':';
 
-  container.append(hour, colon, minute);
+    container.append(hour, colon, minute);
 
-  function setValue(text) {
-    const match = /^(\d{2}):(\d{2})$/.exec(text ?? '');
-    if (!match) return;
-    hour.value = match[1];
-    minute.value = match[2];
+    function setValue(text) {
+      const match = /^(\d{2}):(\d{2})$/.exec(text ?? '');
+      if (!match) return;
+      hour.value = match[1];
+      minute.value = match[2];
+    }
+    setValue(value);
+
+    Object.defineProperty(container, 'value', {
+      get: () => `${hour.value}:${minute.value}`,
+      set: setValue,
+    });
+
+    const notify = () => container.dispatchEvent(new Event('change', { bubbles: true }));
+    hour.addEventListener('change', notify);
+    minute.addEventListener('change', notify);
+
+    return container;
+  } catch (error) {
+    // A silently empty box is the worst possible failure here: on a phone
+    // with no attached devtools, there is no way to tell "broken" apart from
+    // "just hasn't loaded yet". Falling back to plain, visible text -- with
+    // the error message right there in it -- means a real failure is at
+    // least legible without a debugger, and .value still works well enough
+    // that night.js does not also have to know this could happen.
+    console.error('createTimePicker failed', error);
+    container.textContent = `${value ?? '--:--'} (błąd: ${error.message})`;
+    let fallback = value ?? '';
+    Object.defineProperty(container, 'value', {
+      get: () => fallback,
+      set: (text) => { fallback = text; },
+    });
+    return container;
   }
-  setValue(value);
-
-  Object.defineProperty(container, 'value', {
-    get: () => `${hour.value}:${minute.value}`,
-    set: setValue,
-  });
-
-  const notify = () => container.dispatchEvent(new Event('change', { bubbles: true }));
-  hour.addEventListener('change', notify);
-  minute.addEventListener('change', notify);
-
-  return container;
 }
