@@ -8,12 +8,19 @@
 // looking broken.
 
 import { parseClockTime } from '../protocol.js';
+import { createTimePicker } from './time-picker.js';
 
 export function setupNight({ view, send, sendNow }) {
   const toggle = document.querySelector('#night-on');
   const times = document.querySelector('#night-times');
-  const from = document.querySelector('#night-from');
-  const to = document.querySelector('#night-to');
+  const from = createTimePicker(document.querySelector('#night-from'), {
+    value: view.night.from,
+    label: 'od',
+  });
+  const to = createTimePicker(document.querySelector('#night-to'), {
+    value: view.night.to,
+    label: 'do',
+  });
   const note = document.querySelector('#night-note');
 
   function payload() {
@@ -60,8 +67,12 @@ export function setupNight({ view, send, sendNow }) {
     hydrate() {
       toggle.checked = view.night.on;
       times.hidden = !view.night.on;
-      if (document.activeElement !== from) from.value = view.night.from;
-      if (document.activeElement !== to) to.value = view.night.to;
+      // `from`/`to` are compound elements now (an hour <select> and a minute
+      // <select>), so the focused node is one of their children, never the
+      // container itself -- .contains() is what generalises the original
+      // "don't overwrite what she's mid-edit" check to that shape.
+      if (!from.contains(document.activeElement)) from.value = view.night.from;
+      if (!to.contains(document.activeElement)) to.value = view.night.to;
       showNote();
     },
   };

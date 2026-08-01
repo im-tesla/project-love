@@ -145,14 +145,17 @@
         <span class="switch__track" aria-hidden="true"><span class="switch__thumb"></span></span>
       </label>
       <div id="night-times" class="row row--times" hidden>
-        <label class="field field--time">
+        <!-- Populated by time-picker.js: a <label> would ambiguously target
+             one of two independently focusable <select>s inside, so each
+             gets its own aria-label there instead. -->
+        <div class="field field--time">
           <span class="field__label">od</span>
-          <input id="night-from" class="field__input" type="time" value="22:30">
-        </label>
-        <label class="field field--time">
+          <span id="night-from"></span>
+        </div>
+        <div class="field field--time">
           <span class="field__label">do</span>
-          <input id="night-to" class="field__input" type="time" value="07:00">
-        </label>
+          <span id="night-to"></span>
+        </div>
       </div>
       <p id="night-note" class="hint" hidden></p>
     </section>

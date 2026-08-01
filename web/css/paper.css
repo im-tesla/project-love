@@ -161,7 +161,7 @@ body::before {
 
 /* --- accessibility floor ------------------------------------------------- */
 
-:where(button, input, textarea, [tabindex]):focus-visible {
+:where(button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--blush-deep);
   outline-offset: 3px;
 }

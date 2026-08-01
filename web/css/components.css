@@ -227,30 +227,56 @@
 .field--inline .field__label { margin: 0; }
 
 .field--time {
-  /* flex-basis of 8rem, not 0: below 8rem each the row should wrap them onto
-     their own full-width lines rather than squeeze them onto one. A native
-     <input type="time"> renders at different widths across browsers and
-     locales -- notably wider with a 12-hour AM/PM format than a 24-hour one
-     -- and that rendering floor can't be forced smaller by CSS. Letting
-     .row's flex-wrap do its job here is what stays correct regardless of how
-     wide the real control turns out to be on any given phone, rather than
-     both fields fighting to survive on one line at all costs.
-     min-width matches flex-basis so shrinking stops at the same point. */
-  flex: 1 1 8rem;
-  min-width: 8rem;
+  /* The .time-picker inside is small and consistent (see below), so this is
+     just a sensible floor -- below it .row's flex-wrap drops each field to
+     its own full-width line rather than squeezing them. */
+  flex: 1 1 7rem;
+  min-width: 7rem;
 }
-.field--time .field__input {
+/* Built by time-picker.js: two <select>s rather than <input type="time">.
+   That native control renders wildly differently per browser -- notably a
+   wide OS-controlled pill on iOS Safari that ignores width/padding/border
+   entirely -- so no CSS override reliably fixed it, since the browser draws
+   its own widget rather than reading ours. A <select> sizes itself from its
+   own option text, which is just two digits here, so its closed width is
+   small and identical everywhere. This replaces it structurally rather than
+   patching around it. */
+.time-picker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.65rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+  font-family: var(--serif);
   font-size: 1.05rem;
-  text-align: center;
-  /* iOS Safari draws <input type="time"> as its own wide native pill with
-     OS-controlled chrome, ignoring our border/background/padding -- much
-     wider than how Chrome renders the same element, which is why the exact
-     same CSS looked right on desktop but overflowed specifically on iOS.
-     Stripping the native appearance lets our own styling take over instead;
-     tapping the field still opens iOS's native wheel picker, since that
-     behaviour is tied to the input's type, not its visual chrome. */
+  color: var(--ink);
+  transition: border-color 200ms var(--ease), background-color 200ms var(--ease);
+}
+
+.time-picker:focus-within {
+  border-color: var(--blush);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.time-picker__part {
   -webkit-appearance: none;
   appearance: none;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  /* Just wide enough for two digits -- the point of this whole rewrite is
+     that this never has to guess at a native control's rendering width. */
+  width: 1.7em;
+}
+
+.time-picker__colon {
+  color: var(--ink-faint);
 }
 
 /* --- buttons ------------------------------------------------------------- */
