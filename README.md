@@ -99,7 +99,10 @@ night mode — works on a desktop with nothing plugged in.
 
 ### Deploying
 
-Copy `web/` to the server, then use [`deploy/nginx-love.conf`](deploy/nginx-love.conf).
+Full walkthrough: **[docs/hosting.md](docs/hosting.md)**. The short version is
+copy `web/` to the server and use [`deploy/nginx-love.conf`](deploy/nginx-love.conf),
+with [`deploy/nginx-love-bootstrap.conf`](deploy/nginx-love-bootstrap.conf) to
+get through the first certificate.
 
 **HTTPS is not optional.** `navigator.bluetooth` does not exist in an insecure
 context, so over `http://` the Połącz button will report that the browser has no
@@ -108,6 +111,10 @@ rejected too. Use certbot.
 
 Also: do not send a `Permissions-Policy` header that omits `bluetooth`. It
 disables the API silently, with nothing useful in the console.
+
+Before anything else, check you are not behind CGNAT — mobile and some cable
+ISPs in Poland use it by default, and no amount of port forwarding gets past it.
+docs/hosting.md opens with that check and covers the alternatives.
 
 ### On her phone
 
