@@ -147,6 +147,14 @@ body::before {
   flex-wrap: wrap;
 }
 
+/* Same fix as .gate in components.css: an author `display` rule always beats
+   the browser's built-in `[hidden] { display: none; }`, so #night-times
+   (class="row row--times" hidden) never actually hid without this -- the
+   from/to time pickers would show even with night mode switched off. */
+.row[hidden] {
+  display: none;
+}
+
 .row--times {
   margin-top: 1rem;
 }

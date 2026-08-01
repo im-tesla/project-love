@@ -13,6 +13,17 @@
   text-align: center;
 }
 
+/* An author stylesheet's `display` always wins over the browser's built-in
+   `[hidden] { display: none; }`, regardless of selector specificity -- that
+   default only applies when nothing else sets `display` on the element. Since
+   .gate sets it unconditionally above, JS setting gate.hidden = true did
+   nothing visually: the element stayed display:grid and simply sat on top of
+   #app forever, even though every underlying state change was correct. This
+   explicit override is what actually makes the hidden attribute work here. */
+.gate[hidden] {
+  display: none;
+}
+
 .gate__inner { max-width: 20rem; }
 
 /* Dev-only preview shortcut. Deliberately plain and slightly clinical --
