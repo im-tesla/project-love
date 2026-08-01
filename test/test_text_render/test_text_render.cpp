@@ -10,6 +10,7 @@
 #include <cstring>
 #include <string>
 
+#include "font_love.h"  // LOVE_FONT_SPACING
 #include "text_render.h"
 
 using namespace textrender;
@@ -63,9 +64,9 @@ void test_decodes_a_full_polish_sentence(void) {
   TEST_ASSERT_EQUAL_UINT32(0x0142, cps[4]);  // l-stroke
   TEST_ASSERT_EQUAL_UINT32(0x0107, cps[5]);  // c-acute
 
-  // 17 characters from 24 bytes.
+  // 17 characters from 26 bytes -- nine of them are two-byte Polish letters.
   TEST_ASSERT_EQUAL_size_t(17, cps.size());
-  TEST_ASSERT_EQUAL_size_t(24, s.size());
+  TEST_ASSERT_EQUAL_size_t(26, s.size());
   TEST_ASSERT_EQUAL_size_t(17, countChars(s.data(), s.size()));
 }
 

@@ -4,6 +4,7 @@
 // troubleshooting block below rather than editing the renderer.
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 
 // ---------------------------------------------------------------------------

@@ -9,34 +9,6 @@ constexpr char kBlobKey[] = "state";
 
 }  // namespace
 
-void loveDefaultSettings(Settings &s) {
-  memset(&s, 0, sizeof(s));
-
-  s.version = LOVE_SETTINGS_VERSION;
-  s.structSize = sizeof(Settings);
-
-  s.mode = Mode::Text;
-  s.brightness = LOVE_BRIGHTNESS_DEFAULT;
-  s.speed = LOVE_SPEED_DEFAULT;
-
-  strncpy(s.text, LOVE_DEFAULT_TEXT, sizeof(s.text) - 1);
-  strncpy(s.animId, "heartbeat", sizeof(s.animId) - 1);
-
-  // A heart, so a fresh board still shows something worth looking at if she
-  // switches to draw mode before drawing anything.
-  const uint8_t heart[] = {0x0C, 0x1E, 0x3E, 0x7C, 0x3E, 0x1E, 0x0C};
-  const uint8_t left = (LOVE_WIDTH - sizeof(heart)) / 2;
-  memcpy(s.drawing + left, heart, sizeof(heart));
-
-  s.playlistCount = 0;
-  s.playlistDwellS = 30;
-
-  s.nightOn = false;
-  s.nightFromMin = 22 * 60 + 30;
-  s.nightToMin = 7 * 60;
-  s.nightLevel = 0;
-}
-
 bool SettingsStore::begin() {
   loveDefaultSettings(settings_);
 
@@ -56,8 +28,8 @@ bool SettingsStore::begin() {
     return false;
   }
 
-  // Guard against a truncated write leaving unterminated strings, which would
-  // otherwise run the renderer off the end of the buffer.
+  // Guard against a truncated write leaving unterminated strings or nonsense
+  // numbers, either of which would run the renderer off the end of a buffer.
   loaded.text[sizeof(loaded.text) - 1] = '\0';
   loaded.animId[sizeof(loaded.animId) - 1] = '\0';
   for (uint8_t i = 0; i < LOVE_PLAYLIST_SLOTS; i++) {
