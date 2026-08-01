@@ -21,12 +21,27 @@
      instantly, works offline once cached, and needs no third-party origin on a
      site that must load over HTTPS.
 
-     The Windows names are there for previewing on a desktop. They matter most
-     for --script: left to fall through to the generic `cursive`, Windows
-     serves Comic Sans, which is not the note we are going for. */
+     The Windows names after them are only for previewing on a desktop. Every
+     fallback still has to render Polish correctly -- see the note on
+     --script. */
   --serif: Baskerville, "Hoefler Text", "Palatino Linotype", Palatino, Georgia, serif;
+
+  /* Do NOT add "Segoe Script" here, and do not let this fall through to the
+     generic `cursive` either.
+
+     Segoe Script ships on Windows and draws U+0107 with the accent *below*
+     the letter, so "Cześć, Mileno" on the connect screen renders as "Cześç".
+     Because lowercase c is vertically symmetric, nothing else about the word
+     looks wrong, which is what makes it easy to miss. Generic `cursive` on
+     Windows means Comic Sans, which is its own kind of wrong.
+
+     A font that simply lacks a glyph is safe -- the browser falls back per
+     character. The dangerous ones are those that have it and draw it wrong.
+     Gabriola is the calligraphic Windows face closest to Snell Roundhand and
+     gets Polish right. */
   --script: "Snell Roundhand", "Savoye LET", "Apple Chancery",
-            "Segoe Script", "Brush Script MT", cursive;
+            Gabriola, "Segoe Print", cursive;
+
   --type: "American Typewriter", "Courier New", ui-monospace, monospace;
 
   --gutter: clamp(1.15rem, 5vw, 1.75rem);
