@@ -1,18 +1,44 @@
+// Project Love -- a BLE-controlled LED matrix.
+//
+// setup() and loop() only wire things together; the behaviour lives in
+// display.cpp (rendering), settings.cpp (persistence) and ble_service.cpp
+// (the phone).
+
 #include <Arduino.h>
 
-// put function declarations here:
-int myFunction(int, int);
+#include "config.h"
+#include "display.h"
+#include "settings.h"
+
+namespace {
+
+Display display;
+SettingsStore store;
+
+}  // namespace
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(115200);
+  delay(300);  // let native USB CDC come up before the first print
+
+  Serial.println();
+  Serial.println(F("== project love =="));
+
+  display.begin();
+
+  if (LOVE_RUN_SELF_TEST) {
+    display.selfTest();
+  }
+
+  const bool restored = store.begin();
+  Serial.printf("settings: %s\n",
+                restored ? "restored from flash" : "defaults (nothing stored yet)");
+
+  display.apply(store.get(), millis());
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  const uint32_t now = millis();
+  display.tick(now);
+  store.tick(now);
 }
