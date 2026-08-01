@@ -40,6 +40,10 @@ export class MockTransport {
   static get available() { return true; }
   static get secureContext() { return true; }
 
+  // Mirrors BleTransport.getAvailability() so main.js can call it on either
+  // transport without checking which one it has.
+  static async getAvailability() { return true; }
+
   get connected() { return this.#connected; }
 
   async connect() {

@@ -177,6 +177,18 @@ async function attemptConnect() {
 
   connectButton.disabled = true;
   gateNote.textContent = 'Szukam tabliczki…';
+
+  // navigator.bluetooth exists even on a machine with no radio, or one with
+  // Bluetooth switched off -- only calling requestDevice() reveals that, and
+  // on some platforms it does so by hanging forever rather than rejecting.
+  // getAvailability() catches this before it ever gets that far.
+  const radioAvailable = await Transport.getAvailability();
+  if (radioAvailable === false) {
+    gateNote.textContent = 'Bluetooth jest wyłączony lub niedostępny na tym urządzeniu.';
+    connectButton.disabled = false;
+    return;
+  }
+
   try {
     // Must run inside a tap for the real transport: iOS will not open the
     // device chooser otherwise. Mock has no such rule, which is what lets it

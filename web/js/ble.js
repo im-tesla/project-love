@@ -60,6 +60,29 @@ export class BleTransport {
     return typeof window !== 'undefined' && window.isSecureContext;
   }
 
+  /**
+   * Whether a working Bluetooth radio is actually present and switched on --
+   * distinct from `available`, which only checks that the API exists. A
+   * desktop with no adapter, or one with Bluetooth off, still has
+   * `navigator.bluetooth`; calling requestDevice() there is what triggers the
+   * quiet, unrecoverable hang, and getAvailability() is what catches it before
+   * that happens.
+   *
+   * Returns null on browsers old enough not to expose this -- meaning
+   * "unknown", not "unavailable". Chrome and Edge have shipped it since 2020;
+   * this is close to a floor for anything that supports Web Bluetooth at all.
+   */
+  static async getAvailability() {
+    if (typeof navigator === 'undefined' || navigator.bluetooth?.getAvailability == null) {
+      return null;
+    }
+    try {
+      return await navigator.bluetooth.getAvailability();
+    } catch {
+      return null;
+    }
+  }
+
   get connected() {
     return this.#device?.gatt?.connected === true;
   }
