@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fdf6f0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Dla Mileny</title>
+<link rel="stylesheet" href="css/paper.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/intro.css">
+</head>
+<body>
+
+<!-- The first thing she ever sees. Shown once per visit, tap to skip. -->
+<div id="intro" class="intro">
+  <div class="intro__inner">
+    <p class="intro__rule">&#126; &#126; &#126;</p>
+    <p class="intro__line">made with love for</p>
+    <p class="intro__name">Milena</p>
+    <svg class="intro__heart" viewBox="0 0 100 90" aria-hidden="true">
+      <path d="M50 82 C50 82 8 56 8 30 C8 15 20 6 32 6 C41 6 47 11 50 18 C53 11 59 6 68 6 C80 6 92 15 92 30 C92 56 50 82 50 82 Z"/>
+    </svg>
+    <p class="intro__rule">&#126; &#126; &#126;</p>
+  </div>
+</div>
+
+<!-- Connection gate. iOS requires a tap to open the device chooser; there is
+     no way around it, so it is made the single obvious thing on screen. -->
+<div id="gate" class="gate" hidden>
+  <div class="gate__inner">
+    <p class="eyebrow">Twoja tabliczka</p>
+    <h1 class="gate__title">Cze&#347;&#263;, Mileno</h1>
+    <p class="gate__body">Naci&#347;nij, &#380;eby po&#322;&#261;czy&#263; si&#281; z tabliczk&#261;.</p>
+    <button id="connect" class="btn btn--primary btn--large" type="button">Po&#322;&#261;cz</button>
+    <p id="gate-note" class="gate__note" role="status"></p>
+  </div>
+</div>
+
+<!-- The letter itself. -->
+<div id="app" class="sheet" hidden>
+
+  <header class="masthead">
+    <div class="led" aria-hidden="true">
+      <canvas id="preview" class="led__canvas" width="416" height="112"></canvas>
+    </div>
+    <p class="masthead__status">
+      <span id="link" class="link link--off"><span class="link__dot"></span><span id="link-text">&#321;&#261;cz&#281;&#8230;</span></span>
+    </p>
+  </header>
+
+  <div class="crease" aria-hidden="true"></div>
+
+  <nav class="modes" aria-label="Co pokaza&#263;">
+    <button class="chip is-active" type="button" data-mode="text">Wiadomo&#347;&#263;</button>
+    <button class="chip" type="button" data-mode="anim">Animacje</button>
+    <button class="chip" type="button" data-mode="draw">Rysuj</button>
+    <button class="chip" type="button" data-mode="playlist">Playlista</button>
+  </nav>
+
+  <main class="panels">
+
+    <!-- Wiadomosc -->
+    <section class="panel is-active" data-panel="text">
+      <label class="field">
+        <span class="field__label">Napisz co&#347;</span>
+        <textarea id="text-input" class="field__input" rows="2"
+                  maxlength="180" placeholder="Kocham Ci&#281;&#8230;"
+                  autocapitalize="sentences" spellcheck="false"></textarea>
+      </label>
+      <div class="palette" role="group" aria-label="Wstaw znak">
+        <button class="palette__key" type="button" data-insert="&#9829;">&#9829;</button>
+        <button class="palette__key" type="button" data-insert="&#9733;">&#9733;</button>
+        <button class="palette__key" type="button" data-insert="&#9786;">&#9786;</button>
+        <button class="palette__key" type="button" data-insert="&#9834;">&#9834;</button>
+      </div>
+      <p id="text-count" class="hint"></p>
+    </section>
+
+    <!-- Animacje -->
+    <section class="panel" data-panel="anim">
+      <div id="anim-gallery" class="gallery"></div>
+    </section>
+
+    <!-- Rysuj -->
+    <section class="panel" data-panel="draw">
+      <p class="hint hint--top">Rysuj palcem. Ka&#380;dy punkt to jedna &#380;ar&#243;wka.</p>
+      <canvas id="pad" class="pad" width="384" height="96"
+              role="img" aria-label="Obszar rysowania, 32 na 8 punkt&#243;w"></canvas>
+      <div class="row">
+        <button id="pad-clear" class="btn" type="button">Wyczy&#347;&#263;</button>
+        <button id="pad-heart" class="btn" type="button">Serduszko</button>
+      </div>
+    </section>
+
+    <!-- Playlista -->
+    <section class="panel" data-panel="playlist">
+      <p class="hint hint--top">Kilka wiadomo&#347;ci, jedna po drugiej.</p>
+      <ul id="playlist" class="list"></ul>
+      <button id="playlist-add" class="btn" type="button">Dodaj wiadomo&#347;&#263;</button>
+      <label class="field field--inline">
+        <span class="field__label">Zmieniaj co</span>
+        <span class="stepper">
+          <button class="stepper__btn" type="button" data-dwell="-15" aria-label="Kr&#243;cej">&#8722;</button>
+          <output id="dwell-value" class="stepper__value">30 s</output>
+          <button class="stepper__btn" type="button" data-dwell="15" aria-label="D&#322;u&#380;ej">+</button>
+        </span>
+      </label>
+    </section>
+
+    <!-- Always visible: the two dials that apply to everything. -->
+    <section class="dials">
+      <label class="dial">
+        <span class="dial__label">Jasno&#347;&#263;</span>
+        <input id="brightness" class="dial__input" type="range" min="0" max="15" step="1">
+        <output id="brightness-value" class="dial__value"></output>
+      </label>
+      <label class="dial" id="speed-dial">
+        <span class="dial__label">Pr&#281;dko&#347;&#263;</span>
+        <!-- Inverted on purpose: the firmware wants ms-per-column, but "more"
+             should mean faster. main.js flips it. -->
+        <input id="speed" class="dial__input" type="range" min="15" max="160" step="5">
+        <output id="speed-value" class="dial__value"></output>
+      </label>
+    </section>
+
+    <!-- Noc -->
+    <section class="night">
+      <label class="switch">
+        <span class="switch__text">
+          <span class="switch__title">Noc&#261; ga&#347;nie</span>
+          <span class="switch__sub">&#379;eby nie &#347;wieci&#322;o, kiedy &#347;pisz</span>
+        </span>
+        <input id="night-on" type="checkbox" class="switch__input">
+        <span class="switch__track" aria-hidden="true"><span class="switch__thumb"></span></span>
+      </label>
+      <div id="night-times" class="row row--times" hidden>
+        <label class="field field--time">
+          <span class="field__label">od</span>
+          <input id="night-from" class="field__input" type="time" value="22:30">
+        </label>
+        <label class="field field--time">
+          <span class="field__label">do</span>
+          <input id="night-to" class="field__input" type="time" value="07:00">
+        </label>
+      </div>
+      <p id="night-note" class="hint" hidden></p>
+    </section>
+
+    <p class="colophon">zrobione z mi&#322;o&#347;ci&#261; &#9829;</p>
+
+  </main>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

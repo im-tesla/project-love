@@ -1,0 +1,505 @@
+/* Controls, panels, and the LED window. */
+
+/* --- the connection gate ------------------------------------------------- */
+
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+  background: var(--paper);
+  text-align: center;
+}
+
+.gate__inner { max-width: 20rem; }
+
+.gate__title {
+  margin: 0 0 0.6rem;
+  font-family: var(--script);
+  font-size: clamp(2.6rem, 13vw, 3.4rem);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.gate__body {
+  margin: 0 0 2rem;
+  color: var(--ink-soft);
+}
+
+.gate__note {
+  margin: 1.2rem 0 0;
+  min-height: 2.6em;
+  font-family: var(--type);
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--blush-deep);
+}
+
+/* --- the LED window ------------------------------------------------------ */
+/* Pressed into the paper rather than sitting on it: an inner shadow on the
+   frame, and pixels that bloom when lit. */
+
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: max(0.9rem, env(safe-area-inset-top)) 0 0.75rem;
+  background: var(--paper);
+}
+
+.led {
+  padding: 0.7rem 0.75rem;
+  border-radius: var(--radius);
+  background: var(--paper-deep);
+  box-shadow:
+    inset 0 2px 5px rgba(43, 35, 32, 0.13),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.led__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.masthead__status {
+  margin: 0.55rem 0 0;
+  text-align: center;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--type);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.link__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  transition: background-color 240ms var(--ease);
+}
+
+.link--on { color: var(--blush-deep); }
+.link--on .link__dot {
+  background: var(--led);
+  box-shadow: 0 0 6px rgba(255, 45, 32, 0.75);
+}
+
+/* --- mode chips ---------------------------------------------------------- */
+
+.modes {
+  display: flex;
+  gap: 0.35rem;
+  padding: 1.1rem 0 0.2rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.modes::-webkit-scrollbar { display: none; }
+
+.chip {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.2rem;
+  margin-right: 0.8rem;
+  border: 0;
+  background: none;
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  color: var(--ink-faint);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 200ms var(--ease), border-color 200ms var(--ease);
+}
+
+.chip.is-active {
+  color: var(--ink);
+  border-bottom-color: var(--blush);
+}
+
+/* --- panels -------------------------------------------------------------- */
+
+.panels { padding-top: 0.5rem; }
+
+.panel { display: none; padding: 1.1rem 0 0.4rem; }
+.panel.is-active { display: block; animation: fade-in 260ms var(--ease); }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- fields -------------------------------------------------------------- */
+
+.field { display: block; }
+
+.field__label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--type);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.field__input {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  line-height: 1.4;
+  color: var(--ink);
+  resize: none;
+  transition: border-color 200ms var(--ease), background-color 200ms var(--ease);
+}
+
+.field__input::placeholder { color: var(--ink-faint); }
+
+.field__input:focus {
+  outline: none;
+  border-color: var(--blush);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.field--inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.4rem;
+}
+
+.field--inline .field__label { margin: 0; }
+
+.field--time { flex: 1; }
+.field--time .field__input { font-size: 1.05rem; text-align: center; }
+
+/* --- buttons ------------------------------------------------------------- */
+
+.btn {
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  font-family: var(--serif);
+  font-size: 0.98rem;
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 140ms var(--ease), background-color 200ms var(--ease),
+              box-shadow 200ms var(--ease);
+}
+
+.btn:active { transform: translateY(1px); }
+
+.btn--primary {
+  border-color: transparent;
+  background: var(--blush);
+  color: #fff;
+  /* Letterpress: a light top edge and a soft drop, as if stamped in. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 2px 8px rgba(201, 123, 123, 0.35);
+}
+
+.btn--large {
+  width: 100%;
+  padding: 0.95rem 1.5rem;
+  font-size: 1.15rem;
+}
+
+.btn--ghost {
+  padding: 0.35rem 0.6rem;
+  border-color: transparent;
+  background: none;
+  color: var(--ink-faint);
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+/* --- symbol palette ------------------------------------------------------ */
+
+.palette {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+
+.palette__key {
+  flex: 1;
+  padding: 0.5rem 0;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 1.2rem;
+  color: var(--blush-deep);
+  cursor: pointer;
+  transition: background-color 180ms var(--ease), transform 140ms var(--ease);
+}
+
+.palette__key:active { transform: translateY(1px); }
+
+/* --- animation gallery --------------------------------------------------- */
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+}
+
+.card {
+  padding: 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 200ms var(--ease), background-color 200ms var(--ease);
+}
+
+.card.is-active {
+  border-color: var(--blush);
+  background: rgba(232, 160, 160, 0.12);
+}
+
+.card__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  background: var(--paper-deep);
+  box-shadow: inset 0 1px 3px rgba(43, 35, 32, 0.12);
+}
+
+.card__name {
+  display: block;
+  margin-top: 0.5rem;
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.card.is-active .card__name { color: var(--ink); }
+
+/* --- drawing pad --------------------------------------------------------- */
+
+.pad {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 0.9rem;
+  border-radius: var(--radius);
+  background: var(--paper-deep);
+  box-shadow: inset 0 2px 5px rgba(43, 35, 32, 0.13);
+  touch-action: none; /* finger drags draw, they do not scroll the page */
+}
+
+/* --- playlist ------------------------------------------------------------ */
+
+.list {
+  margin: 0 0 0.9rem;
+  padding: 0;
+  list-style: none;
+}
+
+.list__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.list__index {
+  flex: 0 0 auto;
+  width: 1.4rem;
+  font-family: var(--type);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+}
+
+.list__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.4rem 0.2rem;
+  border: 0;
+  background: none;
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+
+.list__input:focus { outline: none; }
+
+.list__empty {
+  padding: 0.9rem 0;
+  font-family: var(--type);
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.stepper__btn {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.stepper__value {
+  min-width: 3.6rem;
+  text-align: center;
+  font-family: var(--type);
+  font-size: 0.82rem;
+}
+
+/* --- dials --------------------------------------------------------------- */
+
+.dials {
+  margin-top: 1.6rem;
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--rule);
+}
+
+.dial {
+  display: grid;
+  grid-template-columns: 5.4rem 1fr 2.6rem;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.45rem 0;
+}
+
+.dial__label {
+  font-family: var(--type);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.dial__value {
+  font-family: var(--type);
+  font-size: 0.74rem;
+  text-align: right;
+  color: var(--ink-soft);
+}
+
+.dial__input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 22px;
+  background: none;
+  cursor: pointer;
+}
+
+.dial__input::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 2px;
+  background: var(--rule);
+}
+
+.dial__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -10px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--blush);
+  box-shadow: 0 1px 4px rgba(201, 123, 123, 0.5);
+}
+
+.dial__input::-moz-range-track {
+  height: 2px;
+  border-radius: 2px;
+  background: var(--rule);
+}
+
+.dial__input::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--blush);
+}
+
+/* --- night switch -------------------------------------------------------- */
+
+.night {
+  margin-top: 1.5rem;
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--rule);
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.switch__title { display: block; font-size: 1.02rem; }
+
+.switch__sub {
+  display: block;
+  margin-top: 0.1rem;
+  font-family: var(--type);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+}
+
+.switch__input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.switch__track {
+  flex: 0 0 auto;
+  position: relative;
+  width: 50px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--rule);
+  transition: background-color 240ms var(--ease);
+}
+
+.switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(43, 35, 32, 0.25);
+  transition: transform 240ms var(--ease);
+}
+
+.switch__input:checked ~ .switch__track { background: var(--blush); }
+.switch__input:checked ~ .switch__track .switch__thumb { transform: translateX(20px); }
+.switch__input:focus-visible ~ .switch__track { outline: 2px solid var(--blush-deep); outline-offset: 3px; }

@@ -13,7 +13,7 @@ export const NOTDEF = 0xFFFD;
 
 /** @type {Map<number, number[]>} codepoint -> column bytes */
 export const GLYPHS = new Map([
-  [0x0020, [0, 0, 0, 0, 0]],  // space
+  [0x0020, [0, 0, 0]],  // space
   [0x0021, [95]],  // !
   [0x0022, [3, 0, 3]],  // "
   [0x0027, [3]],  // '
