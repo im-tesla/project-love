@@ -15,6 +15,36 @@
 
 .gate__inner { max-width: 20rem; }
 
+/* Dev-only preview shortcut. Deliberately plain and slightly clinical --
+   labelled type, no letterpress, nothing that matches the rest of the page --
+   so it never reads as part of the gift itself, just a tool sitting on top
+   of it. Sits above the gate (40) but below the intro (50), so it is
+   reachable once the intro has finished and stays out of the way during it. */
+.demo-fab {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 45;
+  padding: 0.45rem 0.85rem;
+  border: 1px dashed var(--ink-faint);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  font-family: var(--type);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: color 180ms var(--ease), border-color 180ms var(--ease);
+}
+
+.demo-fab:hover,
+.demo-fab:focus-visible {
+  color: var(--ink);
+  border-color: var(--blush-deep);
+  border-style: solid;
+}
+
 .gate__title {
   margin: 0 0 0.6rem;
   font-family: var(--script);

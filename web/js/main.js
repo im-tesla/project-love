@@ -27,10 +27,16 @@ const $ = (selector) => document.querySelector(selector);
 
 // ?mock=1 for local development. LOVE_FORCE_MOCK is set by the single-file
 // build (tools/build_single_file.py), which has no query string to read.
+// Neither is required any more, though -- the "Demo" button (bottom right)
+// swaps in the mock matrix on any page load, real or mock URL, with no
+// hardware and nothing to remember.
 const useMock = new URLSearchParams(location.search).get('mock') === '1'
   || window.LOVE_FORCE_MOCK === true;
-const Transport = useMock ? MockTransport : BleTransport;
-const link = new Transport();
+
+// Mutable: the demo button reassigns both of these to switch into the mock
+// matrix mid-session, regardless of how the page was loaded.
+let activeTransportClass = useMock ? MockTransport : BleTransport;
+let link = new activeTransportClass();
 
 /** Everything the preview and the panels read. Mutated in place. */
 const view = {
@@ -119,80 +125,94 @@ for (const chip of document.querySelectorAll('.chip')) {
 
 // --- device state ----------------------------------------------------------
 
-link.onState = (state) => {
-  view.mode = state.mode ?? view.mode;
-  view.text = state.text ?? view.text;
-  view.bright = state.bright ?? view.bright;
-  view.speed = state.speed ?? view.speed;
-  view.anim = state.anim ?? view.anim;
-  view.playlist = state.playlist ?? view.playlist;
-  view.dwell = state.dwell ?? view.dwell;
-  view.night = state.night ?? view.night;
-  view.clock = state.clock ?? view.clock;
+/**
+ * Wires the two callbacks a transport reports through. Pulled out into a
+ * function, rather than assigned once, because the Demo button below swaps in
+ * a fresh MockTransport instance mid-session and needs the same handlers on
+ * it -- the callbacks live on the instance, so a new instance starts with
+ * nothing listening unless this runs again.
+ */
+function wireTransport(transport) {
+  transport.onState = (state) => {
+    view.mode = state.mode ?? view.mode;
+    view.text = state.text ?? view.text;
+    view.bright = state.bright ?? view.bright;
+    view.speed = state.speed ?? view.speed;
+    view.anim = state.anim ?? view.anim;
+    view.playlist = state.playlist ?? view.playlist;
+    view.dwell = state.dwell ?? view.dwell;
+    view.night = state.night ?? view.night;
+    view.clock = state.clock ?? view.clock;
 
-  const columns = decodeColumns(state.draw);
-  if (columns.length === 32) {
-    view.draw = columns;
-  }
+    const columns = decodeColumns(state.draw);
+    if (columns.length === 32) {
+      view.draw = columns;
+    }
 
-  // Hydrate every control, then repaint.
-  for (const panel of Object.values(panels)) {
-    panel.hydrate?.();
-  }
-  dials.hydrate();
-  night.hydrate();
-  showMode(view.mode, { announce: false });
-};
+    // Hydrate every control, then repaint.
+    for (const panel of Object.values(panels)) {
+      panel.hydrate?.();
+    }
+    dials.hydrate();
+    night.hydrate();
+    showMode(view.mode, { announce: false });
+  };
 
-link.onConnection = (connected) => {
-  const indicator = $('#link');
-  indicator.classList.toggle('link--on', connected);
-  indicator.classList.toggle('link--off', !connected);
-  $('#link-text').textContent = connected ? 'połączono' : 'rozłączono';
+  transport.onConnection = (connected) => {
+    const indicator = $('#link');
+    indicator.classList.toggle('link--on', connected);
+    indicator.classList.toggle('link--off', !connected);
+    $('#link-text').textContent = connected ? 'połączono' : 'rozłączono';
 
-  if (connected) {
-    $('#gate').hidden = true;
-    $('#app').hidden = false;
-    preview.start();
-  }
-};
+    if (connected) {
+      $('#gate').hidden = true;
+      $('#demo-fab').hidden = true;
+      $('#app').hidden = false;
+      preview.start();
+    }
+  };
+}
+
+wireTransport(link);
 
 // --- connecting ------------------------------------------------------------
 
 const gateNote = $('#gate-note');
 const connectButton = $('#connect');
+const demoButton = $('#demo-fab');
 
 function explainUnavailable() {
-  if (!Transport.secureContext) {
+  if (!activeTransportClass.secureContext) {
     return 'Ta strona musi być otwarta przez https — bez tego telefon nie pozwala na Bluetooth.';
   }
   return 'Ta przeglądarka nie obsługuje Bluetooth. Na iPhonie otwórz stronę w aplikacji Bluefy.';
 }
 
 async function attemptConnect() {
-  if (!Transport.available || !Transport.secureContext) {
+  if (!activeTransportClass.available || !activeTransportClass.secureContext) {
     gateNote.textContent = explainUnavailable();
     return;
   }
 
   connectButton.disabled = true;
+  demoButton.disabled = true;
   gateNote.textContent = 'Szukam tabliczki…';
 
   // navigator.bluetooth exists even on a machine with no radio, or one with
   // Bluetooth switched off -- only calling requestDevice() reveals that, and
   // on some platforms it does so by hanging forever rather than rejecting.
   // getAvailability() catches this before it ever gets that far.
-  const radioAvailable = await Transport.getAvailability();
+  const radioAvailable = await activeTransportClass.getAvailability();
   if (radioAvailable === false) {
     gateNote.textContent = 'Bluetooth jest wyłączony lub niedostępny na tym urządzeniu.';
     connectButton.disabled = false;
+    demoButton.disabled = false;
     return;
   }
 
   try {
     // Must run inside a tap for the real transport: iOS will not open the
-    // device chooser otherwise. Mock has no such rule, which is what lets it
-    // be triggered automatically below.
+    // device chooser otherwise. Mock has no such rule.
     await link.connect();
     gateNote.textContent = '';
   } catch (error) {
@@ -204,10 +224,21 @@ async function attemptConnect() {
         : 'Nie udało się połączyć. Sprawdź, czy tabliczka jest podłączona do prądu.';
   } finally {
     connectButton.disabled = false;
+    demoButton.disabled = false;
   }
 }
 
 connectButton.addEventListener('click', attemptConnect);
+
+demoButton.addEventListener('click', () => {
+  // Swaps to a brand new mock matrix regardless of how this page loaded --
+  // the whole point is that this works with no query string and no
+  // hardware, on the real production URL just as well as a dev one.
+  activeTransportClass = MockTransport;
+  link = new MockTransport();
+  wireTransport(link);
+  attemptConnect();
+});
 
 // --- start -----------------------------------------------------------------
 
@@ -215,14 +246,14 @@ preview.setSettings(view);
 
 setupIntro(() => {
   $('#gate').hidden = false;
-  if (!Transport.available || !Transport.secureContext) {
+  if (!activeTransportClass.available || !activeTransportClass.secureContext) {
     gateNote.textContent = explainUnavailable();
     return;
   }
 
-  // Mock mode exists purely to preview the app -- with no hardware to pick,
-  // requiring a tap on the same gate a real connection needs would just be
-  // friction. Real BLE keeps the manual tap; iOS requires it.
+  // ?mock=1 / the single-file build still auto-connect on load, for anyone
+  // relying on the old entry point. The Demo button is the one that works
+  // regardless of the URL.
   if (useMock) {
     attemptConnect();
   }
