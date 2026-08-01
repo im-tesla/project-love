@@ -227,21 +227,21 @@
 .field--inline .field__label { margin: 0; }
 
 .field--time {
-  flex: 1;
-  /* Flex items default to min-width: auto, which floors their size at the
-     content's natural minimum rather than letting them shrink to fit. A
-     native <input type="time"> has a wide natural minimum -- wide enough
-     that two side by side overran a phone screen and overlapped instead of
-     wrapping. This override is what lets them actually shrink. */
-  min-width: 0;
+  /* flex-basis of 8rem, not 0: below 8rem each the row should wrap them onto
+     their own full-width lines rather than squeeze them onto one. A native
+     <input type="time"> renders at different widths across browsers and
+     locales -- notably wider with a 12-hour AM/PM format than a 24-hour one
+     -- and that rendering floor can't be forced smaller by CSS. Letting
+     .row's flex-wrap do its job here is what stays correct regardless of how
+     wide the real control turns out to be on any given phone, rather than
+     both fields fighting to survive on one line at all costs.
+     min-width matches flex-basis so shrinking stops at the same point. */
+  flex: 1 1 8rem;
+  min-width: 8rem;
 }
 .field--time .field__input {
   font-size: 1.05rem;
   text-align: center;
-  /* Same fix at the input level: without it, the input's own intrinsic
-     content width can still win over its parent's width: 100%. */
-  min-width: 0;
-  padding-inline: 0.4rem;
 }
 
 /* --- buttons ------------------------------------------------------------- */
