@@ -9,11 +9,11 @@ export function setupMessage({ view, send, refresh }) {
   function describe() {
     const width = textWidth(view.text);
     if (view.text.length === 0) {
-      count.textContent = 'Puste — tabliczka nic nie pokaże.';
+      count.textContent = 'Puste, tabliczka nic nie pokaże.';
     } else if (width <= 32) {
-      count.textContent = 'Zmieści się w całości i będzie stać nieruchomo.';
+      count.textContent = 'Zmieści się w całości.';
     } else {
-      count.textContent = 'Za długie, żeby stać — będzie się przewijać.';
+      count.textContent = 'Za długie, będzie się przewijać.';
     }
   }
 

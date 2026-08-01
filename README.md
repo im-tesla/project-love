@@ -222,5 +222,3 @@ exchange for protecting against a threat that does not exist. Change
 `LOVE_DEVICE_NAME` in `config.h` if you want it to advertise as something else.
 
 ---
-
-zrobione z miłością ♥
