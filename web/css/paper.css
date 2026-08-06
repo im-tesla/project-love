@@ -57,6 +57,12 @@
 }
 
 html {
+  height: 100%;
+  background-color: var(--paper);
+  /* Stops the whole page rubber-banding past its top/bottom edge on iOS --
+     without this, dragging exposes blank space beyond the paper and it reads
+     as a webpage instead of an app. */
+  overscroll-behavior-y: none;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -69,6 +75,7 @@ body {
   font-size: 17px;
   line-height: 1.5;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
   /* Stops iOS turning a long-press on a canvas into a text selection. */
   -webkit-tap-highlight-color: transparent;
 }
