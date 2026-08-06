@@ -57,7 +57,7 @@ constexpr uint8_t LOVE_HEIGHT = 8;
 #define LOVE_HW_TYPE MD_MAX72XX::FC16_HW
 
 constexpr bool LOVE_FLIP_H = false;
-constexpr bool LOVE_FLIP_V = false;
+constexpr bool LOVE_FLIP_V = true;
 
 // Set false once the wiring is confirmed, to skip straight to her message.
 constexpr bool LOVE_RUN_SELF_TEST = true;

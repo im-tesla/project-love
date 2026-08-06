@@ -46,8 +46,8 @@ void Display::selfTest() {
   push();
   delay(1200);
 
-  Serial.println(F("[self-test] 4/4 scrolling text -- should read MILENA followed by a heart"));
-  const char *banner = "MILENA \xE2\x99\xA5";
+  Serial.println(F("[self-test] 4/4 scrolling text -- should read Milena followed by a heart"));
+  const char *banner = "Milena \xE2\x99\xA5";
   std::vector<uint8_t> bmp = textrender::render(banner, strlen(banner));
   // Blank columns either side so it scrolls fully in and fully out.
   std::vector<uint8_t> padded(LOVE_WIDTH, 0);
